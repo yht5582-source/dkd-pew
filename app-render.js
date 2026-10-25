@@ -2,7 +2,7 @@
       byId("basicFields").innerHTML = basicFields.map(field => fieldMarkup(field, "basics")).join("");
       byId("summaryBasics").innerHTML = basicFields
         .filter(field => ["name", "mrn", "date", "ckdStage", "dialysis", "height", "weight", "dryWeight"].includes(field.id))
-        .map(field => fieldMarkup(field, "basics"))
+        .map(field => fieldMarkup(field, "basics", "summary-basics"))
         .join("");
     }
 
@@ -50,9 +50,9 @@
       byId("dietitianRows").innerHTML = dietitianItems.map(item => {
         const yes = state.dietitian[item.id] === true;
         const no = state.dietitian[item.id] === false;
-        const score = yes ? item.score : 0;
+        const score = yes && !item.support ? item.score : 0;
         return `
-          <tr>
+          <tr${item.support ? ' class="support-row"' : ""}>
             <td><span class="category-pill">${escapeHtml(item.category)}</span></td>
             <td><strong>${escapeHtml(item.indicator)}</strong>${item.reminder ? `<br><span class="note">${escapeHtml(item.reminder)}</span>` : ""}</td>
             <td>${escapeHtml(item.criteria)}</td>
@@ -63,8 +63,8 @@
               </div>
             </td>
             <td data-score-for="${item.id}">${score}</td>
-            <td>${item.main ? "是" : "否"}</td>
-            <td><input aria-label="${escapeHtml(item.indicator)} 備註或數值" data-diet-note="${item.id}" value="${escapeHtml(state.dietitianNotes[item.id] || "")}" style="width:100%; min-width:140px; border:1px solid var(--line); border-radius:8px; padding:7px;"></td>
+            <td>${item.support ? '<span class="note">輔助</span>' : item.main ? "主要" : "次要"}</td>
+            <td><input class="note-input" aria-label="${escapeHtml(item.indicator)} 備註或數值" data-diet-note="${item.id}" value="${escapeHtml(state.dietitianNotes[item.id] || "")}"></td>
           </tr>
         `;
       }).join("");

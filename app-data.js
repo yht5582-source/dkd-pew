@@ -73,14 +73,14 @@ const STORAGE_KEY = "dkd-pew-assessment-v1";
     ];
 
     const educatorFields = [
-      { id: "egfr", label: "eGFR", type: "number", step: "0.1" },
+      { id: "egfr", label: "eGFR", type: "number", step: "0.1", min: 0 },
       { id: "uacr", label: "UACR/UPCR", type: "text" },
-      { id: "hba1c", label: "HbA1c", type: "number", step: "0.1" },
+      { id: "hba1c", label: "HbA1c", type: "number", step: "0.1", min: 0 },
       { id: "dialysisDryWeight", label: "透析/乾體重", type: "text" },
-      { id: "weightToday", label: "今日體重 kg", type: "number", step: "0.1" },
-      { id: "weight1m", label: "1 個月前 kg", type: "number", step: "0.1" },
-      { id: "weight3m", label: "3 個月前 kg", type: "number", step: "0.1" },
-      { id: "weight6m", label: "6 個月前 kg", type: "number", step: "0.1" },
+      { id: "weightToday", label: "今日體重 kg", type: "number", step: "0.1", min: 0 },
+      { id: "weight1m", label: "1 個月前 kg", type: "number", step: "0.1", min: 0 },
+      { id: "weight3m", label: "3 個月前 kg", type: "number", step: "0.1", min: 0 },
+      { id: "weight6m", label: "6 個月前 kg", type: "number", step: "0.1", min: 0 },
       { id: "edema", label: "水腫", type: "select", options: ["", "無", "輕微", "明顯"] },
       { id: "heartFailure", label: "心衰/腹水", type: "select", options: ["", "否", "是"] },
       { id: "recentHospital", label: "近期住院", type: "select", options: ["", "否", "是"] },
@@ -101,29 +101,29 @@ const STORAGE_KEY = "dkd-pew-assessment-v1";
     ];
 
     const dietitianItems = [
-      { id: "albumin", category: "生化", indicator: "Serum albumin", criteria: "<3.8 g/dL；<3.5 g/dL 更具特異性", score: 1, main: true, reminder: "排除大量蛋白尿、肝病、急性感染單獨解釋" },
-      { id: "prealbumin", category: "生化", indicator: "Prealbumin / transthyretin", criteria: "<30 mg/dL，若可取得", score: 1, main: false },
+      { id: "albumin", category: "生化", indicator: "Serum albumin", criteria: "<3.8 g/dL（BCG 法，ISRNM）；<3.5 g/dL 更具特異性", score: 1, main: true, reminder: "排除大量蛋白尿、肝病、急性感染單獨解釋" },
+      { id: "prealbumin", category: "生化", indicator: "Prealbumin / transthyretin", criteria: "<30 mg/dL（ISRNM 僅適用透析病人）", score: 1, main: false },
       { id: "cholesterol", category: "生化", indicator: "Total cholesterol", criteria: "<100 mg/dL，且非降脂藥造成", score: 1, main: false },
-      { id: "crp", category: "生化", indicator: "CRP 升高", criteria: "支持發炎/病因因子", score: 1, main: false },
-      { id: "bicarbonate", category: "生化", indicator: "Bicarbonate", criteria: "<22 mmol/L，支持代謝酸中毒風險", score: 1, main: false },
+      { id: "crp", category: "生化", indicator: "CRP 升高", criteria: "支持發炎/病因因子", score: 1, main: false, support: true, reminder: "病因因子，ISRNM 未列為診斷條件，不計入類別陽性" },
+      { id: "bicarbonate", category: "生化", indicator: "Bicarbonate", criteria: "<22 mmol/L，支持代謝酸中毒風險", score: 1, main: false, support: true, reminder: "病因因子，不計入類別陽性" },
       { id: "weightLoss3m", category: "體重/脂肪", indicator: "非刻意體重下降", criteria: "3 個月 ≥5%", score: 2, main: true, reminder: "水腫/心衰者請用乾體重或去水腫後體重" },
       { id: "weightLoss6m", category: "體重/脂肪", indicator: "非刻意體重下降", criteria: "6 個月 ≥10%", score: 2, main: true },
-      { id: "bmiLow", category: "體重/脂肪", indicator: "BMI", criteria: "<23 kg/m² 亞洲 DKD 可提高警覺", score: 1, main: false },
-      { id: "fatLoss", category: "體重/脂肪", indicator: "體脂明顯下降", criteria: "皮下脂肪下降、衣服變鬆", score: 1, main: false },
+      { id: "bmiLow", category: "體重/脂肪", indicator: "BMI", criteria: "<23 kg/m²（ISRNM；水腫者用乾體重）", score: 1, main: false },
+      { id: "fatLoss", category: "體重/脂肪", indicator: "體脂明顯下降", criteria: "總體脂 <10%（ISRNM），或皮下脂肪明顯下降", score: 1, main: false },
       { id: "dryWeightLoss", category: "體重/脂肪", indicator: "透析患者乾體重下降", criteria: "≥5% / 3 個月", score: 2, main: true },
       { id: "calf", category: "肌肉量/肌力", indicator: "小腿圍", criteria: "男 <34 cm；女 <33 cm 或較前下降", score: 1, main: true, reminder: "肥胖型 PEW 需特別看肌肉與肌力" },
-      { id: "arm", category: "肌肉量/肌力", indicator: "上臂圍 / 上臂肌圍", criteria: "低於同齡族群或連續下降", score: 1, main: false },
+      { id: "arm", category: "肌肉量/肌力", indicator: "上臂圍 / 上臂肌圍", criteria: "上臂肌圍較參考族群第 50 百分位低 >10%（ISRNM）或連續下降", score: 1, main: false },
       { id: "grip", category: "肌肉量/肌力", indicator: "握力", criteria: "男 <28 kg；女 <18 kg 或較前下降 >10%", score: 1, main: true },
-      { id: "sitStand", category: "肌肉量/肌力", indicator: "5 次坐站測試", criteria: ">12 秒或明顯變慢", score: 1, main: false },
-      { id: "biaDxa", category: "肌肉量/肌力", indicator: "BIA / DXA 肌肉量", criteria: "低肌肉量", score: 2, main: true },
+      { id: "sitStand", category: "肌肉量/肌力", indicator: "5 次坐站測試", criteria: "≥12 秒（AWGS 2019）或明顯變慢", score: 1, main: false },
+      { id: "biaDxa", category: "肌肉量/肌力", indicator: "BIA / DXA 肌肉量", criteria: "低肌肉量，或 3 個月減少 ≥5% / 6 個月 ≥10%（ISRNM）", score: 2, main: true },
       { id: "clinicalWasting", category: "肌肉量/肌力", indicator: "臨床肌肉萎縮", criteria: "顳肌、鎖骨、肩胛、股四頭肌萎縮", score: 1, main: false },
-      { id: "energy", category: "飲食攝取", indicator: "熱量攝取", criteria: "<25 kcal/kg/day 持續 ≥1-2 週", score: 1, main: true, reminder: "低蛋白飲食不能犧牲足夠熱量" },
-      { id: "proteinCkd", category: "飲食攝取", indicator: "蛋白質攝取，非透析 CKD", criteria: "明顯低於醫囑，且熱量不足", score: 1, main: false },
-      { id: "proteinDialysis", category: "飲食攝取", indicator: "蛋白質攝取，HD / PD", criteria: "<1.0 g/kg/day 或 nPCR/nPNA 偏低", score: 1, main: false },
+      { id: "energy", category: "飲食攝取", indicator: "熱量攝取", criteria: "非刻意 <25 kcal/kg/day 持續 ≥2 個月（ISRNM）", score: 1, main: true, reminder: "低蛋白飲食不能犧牲足夠熱量（KDOQI 2020 建議 25-35 kcal/kg/day）" },
+      { id: "proteinCkd", category: "飲食攝取", indicator: "蛋白質攝取，非透析 CKD", criteria: "非刻意 <0.6 g/kg/day 持續 ≥2 個月（ISRNM），或明顯低於醫囑且熱量不足", score: 1, main: false },
+      { id: "proteinDialysis", category: "飲食攝取", indicator: "蛋白質攝取，HD / PD", criteria: "非刻意 <0.8 g/kg/day 持續 ≥2 個月（ISRNM），或 nPCR/nPNA 偏低", score: 1, main: false, reminder: "KDOQI 2020 透析目標 1.0-1.2 g/kg/day；<1.0 為未達標，尚非 PEW 條件" },
       { id: "intake75", category: "飲食攝取", indicator: "進食量", criteria: "<平常 75% 持續 ≥1 個月", score: 1, main: true },
       { id: "intake50", category: "飲食攝取", indicator: "進食量", criteria: "<平常 50% 持續 ≥1 週", score: 2, main: true },
-      { id: "giDiet", category: "飲食攝取", indicator: "胃腸症狀", criteria: "噁心、嘔吐、早飽、腹瀉、便祕影響進食", score: 1, main: false },
-      { id: "overRestrictionDiet", category: "飲食攝取", indicator: "過度飲食限制", criteria: "因怕糖、鉀、磷、蛋白而長期吃太少", score: 1, main: false }
+      { id: "giDiet", category: "飲食攝取", indicator: "胃腸症狀", criteria: "噁心、嘔吐、早飽、腹瀉、便祕影響進食", score: 1, main: false, support: true, reminder: "攝取不足的原因，不計入類別陽性" },
+      { id: "overRestrictionDiet", category: "飲食攝取", indicator: "過度飲食限制", criteria: "因怕糖、鉀、磷、蛋白而長期吃太少", score: 1, main: false, support: true, reminder: "攝取不足的原因，不計入類別陽性" }
     ];
 
     const medicalChecks = [
@@ -137,12 +137,12 @@ const STORAGE_KEY = "dkd-pew-assessment-v1";
     ];
 
     const referenceItems = [
-      { title: "Albumin", body: "<3.8 g/dL 警覺；<3.5 g/dL 更具特異性。大量蛋白尿、水腫、肝病、感染會干擾，不可單獨診斷。" },
-      { title: "CRP", body: "升高支持發炎或疾病負擔，足部傷口、感染、住院後常見。" },
+      { title: "DKD-PEW（ISRNM 2008）", body: "四大類（生化、體重/脂肪、肌肉量、飲食攝取）中 ≥3 類、每類至少 1 項異常即可診斷 PEW。CRP、碳酸氫根、胃腸症狀與過度限制屬病因因子，本表列為輔助、不計入類別陽性。" },
+      { title: "Albumin", body: "<3.8 g/dL（BCG 法）警覺；<3.5 g/dL 更具特異性。大量蛋白尿、水腫、肝病、感染會干擾，不可單獨診斷。" },
+      { title: "CRP", body: "升高支持發炎或疾病負擔，足部傷口、感染、住院後常見；屬病因因子而非診斷條件。" },
       { title: "非刻意體重下降", body: "3 個月 ≥5% 或 6 個月 ≥10%。水腫者用乾體重或去水腫後體重。" },
-      { title: "小腿圍", body: "男 <34 cm；女 <33 cm 或較前下降。肥胖型 PEW 更需要量測。" },
-      { title: "握力", body: "男 <28 kg；女 <18 kg 或較前下降 >10%。糖尿病神經病變、關節病變需註記。" },
-      { title: "進食量", body: "<75% 持續 ≥1 月；<50% 持續 ≥1 週。過度限糖、限鉀、限磷、限蛋白常見。" },
-      { title: "透析蛋白質攝取", body: "HD/PD <1.0 g/kg/day 或 nPCR/nPNA 低時需提高警覺，並與磷、鉀、發炎共同評估。" },
-      { title: "DKD-PEW", body: "四大類中 ≥3 類陽性較支持 PEW；避免只依 albumin 或 BMI 判讀。" }
+      { title: "小腿圍 / 握力 / 坐站（AWGS 2019）", body: "小腿圍男 <34 cm、女 <33 cm；握力男 <28 kg、女 <18 kg；5 次坐站 ≥12 秒。為亞洲肌少症篩檢切點，非 ISRNM 原始條件。" },
+      { title: "飲食攝取（ISRNM）", body: "非刻意熱量 <25 kcal/kg/day，或蛋白質 CKD <0.6、透析 <0.8 g/kg/day，持續 ≥2 個月。進食量 <75%（≥1 月）或 <50%（≥1 週）為臨床常用輔助切點。" },
+      { title: "KDOQI 2020 營養目標", body: "熱量 25-35 kcal/kg/day。蛋白質：CKD 3-5 未透析且代謝穩定 0.55-0.6 g/kg/day（糖尿病者 0.6-0.8）；HD/PD 1.0-1.2 g/kg/day。" },
+      { title: "出處", body: "Fouque D, et al. Kidney Int 2008;73:391-398（ISRNM PEW）。Ikizler TA, et al. Am J Kidney Dis 2020;76(3 Suppl 1):S1-S107（KDOQI Nutrition 2020）。Chen LK, et al. J Am Med Dir Assoc 2020;21:300-307（AWGS 2019）。" }
     ];

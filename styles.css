@@ -750,3 +750,66 @@
         border-color: #aaa;
       }
     }
+
+    .note-input {
+      width: 100%;
+      min-width: 140px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px;
+      font: inherit;
+    }
+
+    .support-row td {
+      background: #fafbfb;
+      color: var(--muted);
+    }
+
+    .hints .callout {
+      margin-top: 14px;
+    }
+
+    .hints ul {
+      margin: 6px 0 0;
+      padding-left: 1.2em;
+    }
+
+    .tab:focus-visible {
+      outline: 3px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 620px) {
+      .tabs {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .tab {
+        flex: 0 0 auto;
+        padding: 10px 14px;
+      }
+    }
+
+    @media print {
+      .support-row td {
+        background: none;
+      }
+    }
+
+    td .choices.two {
+      grid-template-columns: repeat(2, auto);
+      min-width: 132px;
+    }
+
+    td .choice {
+      min-height: 38px;
+      padding: 6px 10px;
+      white-space: nowrap;
+    }
+
+    #dietitianRows td:nth-child(5),
+    #dietitianRows td:nth-child(6) {
+      white-space: nowrap;
+    }

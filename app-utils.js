@@ -9,7 +9,11 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // 無痕模式或儲存空間已滿時仍可正常計算，只是不保留資料
+      }
     }
 
     function mergeDeep(target, source) {
@@ -25,6 +29,12 @@
 
     function byId(id) {
       return document.getElementById(id);
+    }
+
+    function numberOrNull(value) {
+      if (value === "" || value === null || value === undefined) return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
     }
 
     function numberValue(value) {
@@ -44,16 +54,17 @@
       el.className = `badge ${kind}`.trim();
     }
 
-    function fieldMarkup(field, section) {
+    function fieldMarkup(field, section, prefix = section) {
       const value = state[section][field.id] ?? "";
+      const id = `${prefix}-${field.id}`;
       if (field.type === "select") {
         const opts = field.options.map(option => `<option value="${escapeHtml(option)}" ${option === value ? "selected" : ""}>${escapeHtml(option || "請選擇")}</option>`).join("");
-        return `<div class="field"><label for="${section}-${field.id}">${field.label}</label><select id="${section}-${field.id}" data-section="${section}" data-key="${field.id}">${opts}</select></div>`;
+        return `<div class="field"><label for="${id}">${field.label}</label><select id="${id}" data-section="${section}" data-key="${field.id}">${opts}</select></div>`;
       }
       const min = field.min !== undefined ? ` min="${field.min}"` : "";
       const max = field.max !== undefined ? ` max="${field.max}"` : "";
       const step = field.step ? ` step="${field.step}"` : "";
-      return `<div class="field"><label for="${section}-${field.id}">${field.label}</label><input id="${section}-${field.id}" data-section="${section}" data-key="${field.id}" type="${field.type}" value="${escapeHtml(value)}"${min}${max}${step}></div>`;
+      return `<div class="field"><label for="${id}">${field.label}</label><input id="${id}" data-section="${section}" data-key="${field.id}" type="${field.type}" value="${escapeHtml(value)}"${min}${max}${step}></div>`;
     }
 
     function escapeHtml(value) {

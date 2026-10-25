@@ -1,3 +1,7 @@
+    function patientAnsweredCount() {
+      return patientQuestions.filter(q => Number.isFinite(state.patientAnswers[q.id])).length;
+    }
+
     function patientScore() {
       return patientQuestions.reduce((sum, q) => sum + numberValue(state.patientAnswers[q.id]), 0);
     }
@@ -13,10 +17,19 @@
     function dietitianStats() {
       const categoryScores = {};
       let total = 0;
+      let supportCount = 0;
+      let answered = 0;
       for (const item of dietitianItems) {
-        const score = state.dietitian[item.id] === true ? item.score : 0;
-        total += score;
-        categoryScores[item.category] = (categoryScores[item.category] || 0) + score;
+        const value = state.dietitian[item.id];
+        if (value === true || value === false) answered += 1;
+        if (value !== true) continue;
+        // CRP、碳酸氫根、胃腸症狀、過度限制屬病因因子（ISRNM 未列為診斷條件），不計入類別陽性
+        if (item.support) {
+          supportCount += 1;
+          continue;
+        }
+        total += item.score;
+        categoryScores[item.category] = (categoryScores[item.category] || 0) + item.score;
       }
       const categories = ["生化", "體重/脂肪", "肌肉量/肌力", "飲食攝取"].map(category => ({
         category,
@@ -25,6 +38,9 @@
       }));
       return {
         total,
+        supportCount,
+        answered,
+        itemCount: dietitianItems.length,
         categories,
         positiveCount: categories.filter(c => c.positive).length
       };
@@ -35,6 +51,41 @@
       const w = numberValue(state.basics.dryWeight || state.basics.weight);
       if (!h || !w) return null;
       return w / ((h / 100) ** 2);
+    }
+
+    // 體重變化百分比：負值為下降；以今日體重對照 1/3/6 個月前
+    function weightTrend(fields = state.educatorFields) {
+      const today = numberOrNull(fields.weightToday);
+      const pct = key => {
+        const past = numberOrNull(fields[key]);
+        if (!today || !past || today <= 0 || past <= 0) return null;
+        return (today - past) / past * 100;
+      };
+      return { m1: pct("weight1m"), m3: pct("weight3m"), m6: pct("weight6m") };
+    }
+
+    function educatorHints(fields = state.educatorFields, risks = state.educatorRisks) {
+      const hints = [];
+      const egfr = numberOrNull(fields.egfr);
+      if (egfr !== null && egfr < 30 && !risks.egfrLow) hints.push(`eGFR ${egfr} <30：可勾選「eGFR <30」。`);
+      const uacrMatch = String(fields.uacr || "").replace(/,/g, "").match(/\d+(\.\d+)?/);
+      const uacr = uacrMatch ? Number(uacrMatch[0]) : null;
+      if (uacr !== null && uacr >= 300 && !risks.proteinuria) hints.push(`UACR/UPCR ${uacr} ≥300：可勾選「明顯蛋白尿」。`);
+      const trend = weightTrend(fields);
+      if (trend.m3 !== null && trend.m3 <= -5) hints.push(`3 個月體重下降 ${Math.abs(trend.m3).toFixed(1)}%（≥5%）：達 PEW 體重條件，建議轉營養師確認。`);
+      if (trend.m6 !== null && trend.m6 <= -10) hints.push(`6 個月體重下降 ${Math.abs(trend.m6).toFixed(1)}%（≥10%）：達 PEW 體重條件，建議轉營養師確認。`);
+      const fluid = fields.edema === "明顯" || fields.heartFailure === "是";
+      if (fluid) hints.push("明顯水腫或心衰/腹水：體重下降可能被水分掩蓋，請以乾體重判讀。");
+      if (fields.heartFailure === "是" && !risks.heartFailure) hints.push("心衰/腹水：可勾選「心衰竭或反覆水腫」。");
+      if (fields.woundInfection === "是" && !risks.wound) hints.push("足部傷口/感染：可勾選「足部潰瘍、感染或慢性傷口」。");
+      if (fields.recentHospital === "是") hints.push("近期住院：建議出院後 2-4 週內重評。");
+      return hints;
+    }
+
+    function formatTrend(value) {
+      if (value === null) return "未填寫";
+      const sign = value > 0 ? "+" : "";
+      return `${sign}${value.toFixed(1)}%`;
     }
 
     function patientInterpretation(score, flags) {
@@ -161,12 +212,18 @@
       const dStats = dietitianStats();
       const d = dietitianInterpretation(dStats);
       const bmi = bmiValue();
+      const answered = patientAnsweredCount();
+      const trend = weightTrend();
+      const hints = educatorHints();
 
       setText("patientScore", pScore);
       setText("patientRedFlagCount", pFlags);
       setText("bmiResult", bmi ? `${bmi.toFixed(1)} kg/m²` : "未填寫");
       setText("patientInterpretation", p.text);
-      setText("patientAction", p.action);
+      setText("patientAction", answered < patientQuestions.length
+        ? `${p.action}（尚有 ${patientQuestions.length - answered} 題未作答，分數可能低估。）`
+        : p.action);
+      setText("patientAnswered", `${answered} / ${patientQuestions.length}`);
       setText("patientNextStep", p.next);
       setBadge("patientLevel", p.badge, p.kind);
       setMeter("patientMeter", Math.min(pScore / 20, 1), pScore >= 7 || pFlags ? "high" : pScore >= 4 ? "risk" : "");
@@ -177,12 +234,20 @@
       setText("educatorRiskTier", e.tier);
       setText("educatorCareNeed", e.need);
       setBadge("educatorLevel", e.badge, e.kind);
+      setText("trend1m", formatTrend(trend.m1));
+      setText("trend3m", formatTrend(trend.m3));
+      setText("trend6m", formatTrend(trend.m6));
+      byId("educatorHints").innerHTML = hints.length
+        ? `<div class="callout warn"><strong>依輸入數值的提示</strong><ul>${hints.map(h => `<li>${escapeHtml(h)}</li>`).join("")}</ul></div>`
+        : "";
       setMeter("educatorMeter", Math.min(eScore / 10, 1), eScore >= 3 ? "high" : eScore >= 1 ? "risk" : "");
 
       setText("categoryPositiveCount", dStats.positiveCount);
       setText("dietitianInterpretation", d.text);
       setText("dietitianAction", d.action);
       setText("dietitianTotalScore", dStats.total);
+      setText("dietitianSupportCount", dStats.supportCount);
+      setText("dietitianAnswered", `${dStats.answered} / ${dStats.itemCount}`);
       setBadge("dietitianLevel", d.badge, d.kind);
       setMeter("dietitianMeter", Math.min(dStats.positiveCount / 4, 1), dStats.positiveCount >= 3 ? "high" : dStats.positiveCount >= 2 ? "risk" : "");
       updateDietitianTableScores();
@@ -238,11 +303,12 @@
     function renderSummaryRows(pScore, pFlags, p, eScore, e, dStats, d) {
       const nutritionTotalText = dStats.total >= 7 ? "高度可能 PEW" : dStats.total >= 5 ? "疑似 PEW" : dStats.total >= 3 ? "輕度風險" : "低風險";
       const rows = [
-        ["病人自填", "總分", `${pScore} / 20`, p.text, p.next, pScore >= 7 ? "2-4 週內" : pScore >= 4 ? "1 個月內" : "例行"],
+        ["病人自填", "總分", `${pScore} / 20`, p.text, p.next, pScore >= 11 ? "1 週內" : pScore >= 7 ? "2-4 週內" : pScore >= 4 ? "1 個月內" : "例行"],
         ["病人自填", "紅旗數", `${pFlags}`, pFlags >= 1 ? "有紅旗" : "無紅旗", pFlags >= 1 ? "聯絡照護團隊" : "例行追蹤", pFlags >= 1 ? "儘快" : "例行"],
         ["衛教師評估", "DKD 風險因子", `${eScore} / 10`, e.text, e.need, eScore >= 3 ? "儘快或依院內流程" : eScore >= 1 ? "1 個月內" : "例行"],
         ["營養師確認", "四大類陽性數", `${dStats.positiveCount} / 4`, d.text, d.action, dStats.positiveCount >= 2 ? "2-4 週內" : "依病況"],
-        ["營養師確認", "PEW 總分", `${dStats.total}`, nutritionTotalText, "依營養師處方追蹤", "依病況"]
+        ["營養師確認", "PEW 總分", `${dStats.total}`, nutritionTotalText, "依營養師處方追蹤", "依病況"],
+        ["營養師確認", "病因因子", `${dStats.supportCount} 項`, dStats.supportCount ? "有可逆病因" : "未勾選", dStats.supportCount ? "處理發炎、酸中毒、胃腸症狀或過度限制" : "—", "依病況"]
       ];
       byId("summaryRows").innerHTML = rows.map(row => `
         <tr>
@@ -257,14 +323,22 @@
     }
 
     function attachListeners() {
-      document.querySelectorAll(".tab").forEach(tab => {
+      const tabs = [...document.querySelectorAll(".tab")];
+      tabs.forEach((tab, index) => {
         tab.addEventListener("click", () => {
-          const target = tab.dataset.tab;
-          document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t === tab)));
-          document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === target));
+          showTab(tab.dataset.tab);
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
+        tab.addEventListener("keydown", event => {
+          const delta = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+          if (!delta) return;
+          event.preventDefault();
+          const next = tabs[(index + delta + tabs.length) % tabs.length];
+          next.focus();
+          showTab(next.dataset.tab);
+        });
       });
+      window.addEventListener("hashchange", () => showTab(location.hash.slice(1), false));
 
       document.addEventListener("input", event => {
         const target = event.target;
@@ -317,6 +391,18 @@
       });
     }
 
+    function showTab(target, updateHash = true) {
+      const tabs = [...document.querySelectorAll(".tab")];
+      if (!tabs.some(t => t.dataset.tab === target)) target = tabs[0].dataset.tab;
+      tabs.forEach(t => {
+        const selected = t.dataset.tab === target;
+        t.setAttribute("aria-selected", String(selected));
+        t.tabIndex = selected ? 0 : -1;
+      });
+      document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === target));
+      if (updateHash && location.hash.slice(1) !== target) history.replaceState(null, "", `#${target}`);
+    }
+
     function syncDuplicateBasicFields(key, value, originId) {
       document.querySelectorAll(`[data-section="basics"][data-key="${key}"]`).forEach(input => {
         if (input.id !== originId) input.value = value;
@@ -342,6 +428,3 @@
 
       updateAll();
     }
-
-    attachListeners();
-    init();

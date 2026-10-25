@@ -26,18 +26,18 @@
 
   <main class="wrap">
     <div class="privacy-strip">
-      本工具在瀏覽器本機運算，不會上傳個案資料。臨床使用時請依院內規範保存紀錄。
+      本工具在瀏覽器本機運算，不會上傳個案資料；已填內容僅暫存於此瀏覽器，共用電腦用畢請按「清除」。臨床使用時請依院內規範保存紀錄。
     </div>
 
-    <nav class="tabs" aria-label="評估區段">
-      <button class="tab" type="button" data-tab="patient" aria-selected="true">病人自填</button>
-      <button class="tab" type="button" data-tab="educator" aria-selected="false">衛教師評估</button>
-      <button class="tab" type="button" data-tab="dietitian" aria-selected="false">營養師確認</button>
-      <button class="tab" type="button" data-tab="summary" aria-selected="false">判定摘要</button>
-      <button class="tab" type="button" data-tab="references" aria-selected="false">參考標準</button>
+    <nav class="tabs" role="tablist" aria-label="評估區段">
+      <button class="tab" type="button" role="tab" id="tab-patient" aria-controls="patient" data-tab="patient" aria-selected="true">病人自填</button>
+      <button class="tab" type="button" role="tab" id="tab-educator" aria-controls="educator" data-tab="educator" aria-selected="false">衛教師評估</button>
+      <button class="tab" type="button" role="tab" id="tab-dietitian" aria-controls="dietitian" data-tab="dietitian" aria-selected="false">營養師確認</button>
+      <button class="tab" type="button" role="tab" id="tab-summary" aria-controls="summary" data-tab="summary" aria-selected="false">判定摘要</button>
+      <button class="tab" type="button" role="tab" id="tab-references" aria-controls="references" data-tab="references" aria-selected="false">參考標準</button>
     </nav>
 
-    <section class="panel active" id="patient" aria-labelledby="patient-title">
+    <section class="panel active" id="patient" role="tabpanel" aria-labelledby="tab-patient">
       <div class="grid two">
         <div class="grid">
           <div class="tool-card">
@@ -91,6 +91,7 @@
             <p id="patientAction">若食慾、體重或活動力變差，請提前回報照護團隊。</p>
           </div>
           <div class="summary-list">
+            <div class="summary-item"><span>已作答</span><strong id="patientAnswered">0 / 10</strong></div>
             <div class="summary-item"><span>紅旗數</span><strong id="patientRedFlagCount">0</strong></div>
             <div class="summary-item"><span>BMI</span><strong id="bmiResult">未填寫</strong></div>
             <div class="summary-item"><span>下一步</span><strong id="patientNextStep">例行追蹤</strong></div>
@@ -99,7 +100,7 @@
       </div>
     </section>
 
-    <section class="panel" id="educator" aria-labelledby="educator-title">
+    <section class="panel" id="educator" role="tabpanel" aria-labelledby="tab-educator">
       <div class="grid two">
         <div class="grid">
           <div class="tool-card">
@@ -158,12 +159,16 @@
             <div class="summary-item"><span>評估方式</span><strong>獨立評估</strong></div>
             <div class="summary-item"><span>風險分層</span><strong id="educatorRiskTier">低</strong></div>
             <div class="summary-item"><span>建議</span><strong id="educatorCareNeed">例行追蹤</strong></div>
+            <div class="summary-item"><span>體重變化 1 個月</span><strong id="trend1m">未填寫</strong></div>
+            <div class="summary-item"><span>體重變化 3 個月</span><strong id="trend3m">未填寫</strong></div>
+            <div class="summary-item"><span>體重變化 6 個月</span><strong id="trend6m">未填寫</strong></div>
           </div>
+          <div id="educatorHints" class="hints"></div>
         </aside>
       </div>
     </section>
 
-    <section class="panel" id="dietitian" aria-labelledby="dietitian-title">
+    <section class="panel" id="dietitian" role="tabpanel" aria-labelledby="tab-dietitian">
       <div class="grid two">
         <div class="grid">
           <div class="tool-card">
@@ -183,14 +188,14 @@
                     <th>異常標準</th>
                     <th>選擇</th>
                     <th>分數</th>
-                    <th>主要</th>
+                    <th>權重</th>
                     <th>備註/數值</th>
                   </tr>
                 </thead>
                 <tbody id="dietitianRows"></tbody>
               </table>
             </div>
-            <p class="note">同一類別內任一指標陽性，即該類別陽性；四大類中 ≥3 類陽性支持 DKD-PEW。</p>
+            <p class="note">同一類別內任一指標陽性，即該類別陽性；四大類中 ≥3 類陽性支持 DKD-PEW（ISRNM 2008）。標示「輔助」者為病因因子，只記錄、不計入類別陽性與總分。</p>
           </div>
 
           <div class="tool-card">
@@ -241,13 +246,15 @@
           </div>
           <div class="summary-list" id="categorySummary"></div>
           <div class="summary-list">
+            <div class="summary-item"><span>已評項目</span><strong id="dietitianAnswered">0 / 23</strong></div>
             <div class="summary-item"><span>PEW 總分</span><strong id="dietitianTotalScore">0</strong></div>
+            <div class="summary-item"><span>病因因子</span><strong id="dietitianSupportCount">0</strong></div>
           </div>
         </aside>
       </div>
     </section>
 
-    <section class="panel" id="summary" aria-labelledby="summary-title">
+    <section class="panel" id="summary" role="tabpanel" aria-labelledby="tab-summary">
       <div class="grid two">
         <div class="tool-card">
           <div class="section-title">
@@ -300,7 +307,7 @@
       </div>
     </section>
 
-    <section class="panel" id="references" aria-labelledby="references-title">
+    <section class="panel" id="references" role="tabpanel" aria-labelledby="tab-references">
       <div class="tool-card">
         <div class="section-title">
           <div>
@@ -320,5 +327,6 @@
   <script src="app-utils.js"></script>
   <script src="app-render.js"></script>
   <script src="app-logic.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
