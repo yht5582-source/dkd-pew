@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="DKD-PEW 評估工具：病人自填、衛教師、營養師三份獨立評估表。">
   <title>DKD-PEW 評估工具</title>
-  <link rel="stylesheet" href="styles.css?v=2.1">
-  <link rel="stylesheet" href="teach.css?v=2.1">
+  <link rel="stylesheet" href="styles.css?v=2.2">
+  <link rel="stylesheet" href="teach.css?v=2.2">
 </head>
 <body>
   <header class="topbar">
@@ -53,7 +53,7 @@
             <div class="section-title">
               <div>
                 <h2 id="patient-title">A. 病人自填快速篩檢</h2>
-                <p>請依最近 1 個月狀況填寫；體重變化請依最近 3-6 個月。</p>
+                <p>請依最近 1 個月狀況填寫；體重變化請依最近 3-6 個月。分層 4／7／11 分為本工具設定。</p>
               </div>
               <span class="badge">0-20 分</span>
             </div>
@@ -204,7 +204,7 @@
                 <tbody id="dietitianRows"></tbody>
               </table>
             </div>
-            <p class="note">同一類別內任一指標陽性，即該類別陽性；四大類中 ≥3 類陽性支持 DKD-PEW（ISRNM 2008）。標示「輔助」者為病因因子，只記錄、不計入類別陽性與總分。</p>
+            <p class="note">同一類別內任一指標陽性，即該類別陽性；四大類中 ≥3 類陽性支持 DKD-PEW（ISRNM 2008）；ISRNM 建議每項條件最好記錄至少 3 次，間隔以 2-4 週為佳，單次評估請保守解讀。標示「工具擴充」者不是 ISRNM 原始項目，因此工具達 3 類不等於符合 ISRNM 原始條件。標示「輔助」者為病因因子，只記錄、不計入類別陽性與總分。同一次體重下降，總分只計一次。</p>
           </div>
 
           <div class="tool-card">
@@ -256,7 +256,7 @@
           <div class="summary-list" id="categorySummary"></div>
           <div class="summary-list">
             <div class="summary-item"><span>已評項目</span><strong id="dietitianAnswered">0 / 23</strong></div>
-            <div class="summary-item"><span>PEW 總分</span><strong id="dietitianTotalScore">0</strong></div>
+            <div class="summary-item"><span>PEW 總分（工具設定）</span><strong id="dietitianTotalScore">0</strong></div>
             <div class="summary-item"><span>病因因子</span><strong id="dietitianSupportCount">0</strong></div>
           </div>
         </aside>
@@ -393,12 +393,12 @@
     </section>
   </main>
 
-  <script src="app-data.js?v=2.1"></script>
-  <script src="app-utils.js?v=2.1"></script>
-  <script src="app-render.js?v=2.1"></script>
-  <script src="app-logic.js?v=2.1"></script>
-  <script src="teach-content.js?v=2.1"></script>
-  <script src="teach.js?v=2.1"></script>
-  <script src="app.js?v=2.1"></script>
+  <script src="app-data.js?v=2.2"></script>
+  <script src="app-utils.js?v=2.2"></script>
+  <script src="app-render.js?v=2.2"></script>
+  <script src="app-logic.js?v=2.2"></script>
+  <script src="teach-content.js?v=2.2"></script>
+  <script src="teach.js?v=2.2"></script>
+  <script src="app.js?v=2.2"></script>
 </body>
 </html>

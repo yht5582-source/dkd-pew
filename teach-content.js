@@ -140,13 +140,13 @@ const TEACH_CASES = [
     },
     scenarios: [
       { label: "工具判讀", yes: ["albumin", "prealbumin", "dryWeightLoss", "bmiLow", "calf", "grip", "clinicalWasting", "energy", "proteinDialysis", "bicarbonate", "overRestrictionDiet"], expect: { positive: 4, badge: "符合 DKD-PEW", total: 10, support: 2 } },
-      { label: "同一次體重下降勾兩項", yes: ["albumin", "prealbumin", "weightLoss3m", "dryWeightLoss", "bmiLow", "calf", "grip", "clinicalWasting", "energy", "proteinDialysis", "bicarbonate", "overRestrictionDiet"], expect: { positive: 4, badge: "符合 DKD-PEW", total: 12, support: 2 } }
+      { label: "同一次體重下降勾兩項", yes: ["albumin", "prealbumin", "weightLoss3m", "dryWeightLoss", "bmiLow", "calf", "grip", "clinicalWasting", "energy", "proteinDialysis", "bicarbonate", "overRestrictionDiet"], expect: { positive: 4, badge: "符合 DKD-PEW", total: 10, support: 2 } }
     ],
     expect: { patient: 14, flags: 3, patientBadge: "極高風險", educator: 3, tier: "高", m3: -6.4, m6: -8.3, bmi: 19.0 },
     read: [
       "四大類全陽性。前白蛋白 <30 mg/dL 這一項只適用於維持性透析，她適用。",
       "蛋白質 0.68 g/kg 低於 ISRNM 透析切點 <0.8，熱量 20 kcal/kg 低於 <25，都超過 2 個月。",
-      "第二列提醒：PEW 總分會因同一事實勾兩次而灌水。判定看的是類別數，類別數不變。",
+      "第二列提醒：同一次體重下降勾兩項時，總分只計一次，類別數也不變。判定看的是類別數。",
       "透析前低碳酸氫根與過度限制列為病因因子，不計入類別，但都是可介入的目標。"
     ],
     plan: [
@@ -203,7 +203,7 @@ const TEACH_CASES = [
     title: "打 GLP-1 RA 瘦了 10%，工具跳提示了",
     stem: "59 歲女性，DKD G3a，肥胖。為血糖與體重開始使用 semaglutide，半年內瘦 8.5 kg，她很滿意。食量變小、偶有噁心，三日紀錄每日 1450 kcal、蛋白質 62 g。握力與起身都沒有退步。",
     facts: ["158 cm／76 kg", "BMI 30.4", "3 個月前 81 kg", "6 個月前 84.5 kg", "eGFR 52", "UACR 420 mg/g", "HbA1c 6.9%", "白蛋白 4.1 g/dL（BCG）", "握力 24 kg（與前次相近）", "5 次坐站 10 秒", "小腿圍 38 cm"],
-    question: "衛教師頁跳出「達 PEW 體重條件」，營養師該照勾嗎？該不該停藥？",
+    question: "衛教師頁跳出體重提示，營養師該勾體重類嗎？該不該停藥？",
     input: {
       basics: { age: "59", sex: "女", ckdStage: "G3a", height: "158", weight: "76" },
       patientAnswers: { appetite: 1, mealAmount: 2, skipMeals: 0, proteinFoods: 0, weightLoss: 0, muscleLoss: 0, function: 0, giSymptoms: 1, restriction: 0, infection: 0 },
@@ -216,12 +216,12 @@ const TEACH_CASES = [
     },
     scenarios: [
       { label: "正確判讀", yes: [], expect: { positive: 0, badge: "目前未符合", total: 0, support: 0 } },
-      { label: "誤把刻意減重算陽性", yes: ["weightLoss3m", "weightLoss6m"], expect: { positive: 1, badge: "單一類別異常", total: 4, support: 0 } },
+      { label: "誤把刻意減重算陽性", yes: ["weightLoss3m", "weightLoss6m"], expect: { positive: 1, badge: "單一類別異常", total: 2, support: 0 } },
       { label: "追蹤時握力較前下降 >10%", yes: ["grip"], expect: { positive: 1, badge: "單一類別異常", total: 1, support: 0 } }
     ],
     expect: { patient: 4, flags: 0, patientBadge: "PEW 風險", educator: 1, tier: "中", m3: -6.2, m6: -10.1, bmi: 30.4, hints: 2 },
     read: [
-      "ISRNM 的體重與攝取條件都限定「非刻意」。工具只會算百分比，看不出有沒有刻意，所以這個提示要由人判讀。",
+      "ISRNM 的體重與攝取條件都限定「非刻意」。工具只會算百分比，看不出有沒有刻意，所以提示寫「若為非刻意」，要由人判讀。",
       "自填 4 分落在工具的「PEW 風險」，是食慾與進食量下降造成的，符合用藥預期；紅旗條件同樣限定非刻意。",
       "白蛋白、握力、坐站都正常，目前沒有任何類別陽性。",
       "沒有 PEW 不代表不必追蹤：本頁讀過的指引沒有 GLP-1 RA 使用者專屬的肌肉追蹤切點，只能用既有的握力、坐站趨勢觀察。"
@@ -238,7 +238,7 @@ const TEACH_CASES = [
 
 const TEACH_QUIZ = [
   { level: "基礎", stem: "ISRNM 2008 診斷 PEW 的規則是？", options: ["四大類至少 2 類，其中白蛋白必須同時異常", "四大類至少 3 類，每類至少 1 項異常", "四大類全部都要有至少 1 項異常才算", "任一類別內有 2 項以上異常即可診斷"], answer: 1, why: "表 1 註：至少 3 類，且所選類別內至少 1 項符合。白蛋白不是必要條件。", src: ["isrnm"] },
-  { level: "基礎", stem: "ISRNM 的血清白蛋白切點（Bromcresol Green 法）是？", options: ["<3.8 g/dL", "<3.5 g/dL", "<3.0 g/dL", "<4.0 g/dL"], answer: 0, why: "ISRNM 為 <3.8 g/dL（BCG）。工具另列 <3.5 作為提醒，這個數字不是 ISRNM 的診斷切點。", src: ["isrnm"] },
+  { level: "基礎", stem: "ISRNM 的血清白蛋白切點（Bromcresol Green 法）是？", options: ["<3.8 g/dL", "<3.5 g/dL", "<3.0 g/dL", "<4.0 g/dL"], answer: 0, why: "ISRNM 為 <3.8 g/dL（BCG）。工具的紅旗條件另用 <3.5 作警訊，這個數字不是 ISRNM 的診斷切點。", src: ["isrnm"] },
   { level: "基礎", stem: "ISRNM 對 CRP 的定位是？", options: ["屬於生化類診斷條件之一", "升高即可單獨診斷 PEW", "可以取代白蛋白作為生化條件", "可作線索，但不列入診斷條件"], answer: 3, why: "ISRNM 指出 CRP 等發炎指標在 PEW 可能持續升高，但不應作為診斷條件。工具因此列為「輔助」不計分。", src: ["isrnm"] },
   { level: "基礎", stem: "ISRNM 的非刻意體重下降條件是？", options: ["1 個月 3% 或 3 個月 5%", "3 個月 3% 或 6 個月 5%", "3 個月 5% 或 6 個月 10%", "6 個月 5% 或 12 個月 10%"], answer: 2, why: "以無水腫體重計，3 個月 5% 或 6 個月 10%；任何程度的非刻意下降都應提高警覺。", src: ["isrnm"] },
   { level: "基礎", stem: "未透析 CKD 2-5 的 ISRNM 低蛋白攝取條件是？", options: ["<0.8 g/kg/day，至少 2 個月", "<0.6 g/kg/day，至少 1 個月", "<0.55 g/kg/day，至少 3 個月", "<0.6 g/kg/day，至少 2 個月"], answer: 3, why: "CKD 2-5 為 <0.6、透析為 <0.8 g/kg/day，都需非刻意且持續至少 2 個月。", src: ["isrnm"] },
@@ -257,7 +257,7 @@ const TEACH_QUIZ = [
   { level: "高階", stem: "CKD G4 病人 HCO3 20 mmol/L。關於兩份指引，何者正確？", options: ["兩份指引都明確要求維持在 ≥22 mmol/L 以上", "KDIGO 要求維持 24-26；KDOQI 則以 <18 作為治療門檻", "兩份指引都不建議使用鹼劑，只靠飲食調整即可", "KDOQI 認為維持 24-26 合理；KDIGO 舉例 <18 應避免"], answer: 3, why: "KDOQI 6.1.3（OPINION）24-26 mmol/L；KDIGO PP 3.10.1 舉例 <18，並提醒精確門檻尚待大型試驗。兩者不同，由團隊決定。工具的 <22 只用來標示病因因子。", src: ["kdoqi", "kdigo"] },
   { level: "高階", stem: "用 BIA 評估 PEW，何者符合 KDOQI 2020？", options: ["HD 當次結束後立刻量最準；未透析與 PD 也建議常規使用", "PD 病人首選 BIA；HD 因體液變動大而不建議使用", "HD 於透析結束至少 30 分鐘後量；未透析與 PD 證據不足", "未透析 CKD 應每月常規量 BIA；HD 則於透析開始前量"], answer: 2, why: "1.1.1：HD 建議用 BIA（以多頻為佳），於透析結束至少 30 分鐘後測量。1.1.2：CKD 1-5 與 PD 證據不足。", src: ["kdoqi"] },
   { level: "高階", stem: "白蛋白 3.6、握力低、進食量 <75% 超過 1 個月，但沒有體重下降，也沒算熱量與蛋白質。工具顯示 3 類。如何看？", options: ["工具達 3 類，但握力與進食比例非 ISRNM 原始項目，應補測", "工具顯示 3 類就等同 ISRNM 確診，不需要再補任何測量", "握力不在 ISRNM 內，工具結果應作廢，直接改判為未符合", "再補勾 CRP 與碳酸氫根，就能達到 ISRNM 要求的 3 類條件"], answer: 0, why: "工具為臨床使用把握力、小腿圍、坐站、進食比例放進類別，比 ISRNM 原始項目寬。要嚴格對應 ISRNM，需要肌肉量與 kcal/kg、g/kg。工具結果仍有臨床意義，不是作廢。", src: ["isrnm", "awgs"] },
-  { level: "高階", stem: "使用 GLP-1 RA 的病人半年瘦 10%（本人想減重），衛教師頁跳出「達 PEW 體重條件」，肌力正常。最合適的是？", options: ["照提示勾選體重類，並請醫師停藥以免肌肉繼續流失", "體重類不計，因為是刻意減重；持續追蹤肌力與攝取", "體重下降這麼快代表藥物過量，應立即減量或改用其他藥", "刪除這段期間的體重紀錄，避免之後被工具誤判為陽性"], answer: 1, why: "ISRNM 的條件限定非刻意。工具提示只算百分比，需人工判讀。停藥與否回到醫師；FLOW 顯示 semaglutide 對 T2D 合併 CKD 有腎臟獲益。", src: ["isrnm", "flow"] }
+  { level: "高階", stem: "使用 GLP-1 RA 的病人半年瘦 10%（本人想減重），衛教師頁跳出體重提示，肌力正常。最合適的是？", options: ["照提示勾選體重類，並請醫師停藥以免肌肉繼續流失", "體重類不計，因為是刻意減重；持續追蹤肌力與攝取", "體重下降這麼快代表藥物過量，應立即減量或改用其他藥", "刪除這段期間的體重紀錄，避免之後被工具誤判為陽性"], answer: 1, why: "ISRNM 的條件限定非刻意。工具提示只算百分比，需人工判讀。停藥與否回到醫師；FLOW 顯示 semaglutide 對 T2D 合併 CKD 有腎臟獲益。", src: ["isrnm", "flow"] }
 ];
 
 const TEACH_MAP = {

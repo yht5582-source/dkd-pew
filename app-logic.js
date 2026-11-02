@@ -14,11 +14,29 @@
       return educatorRisks.reduce((sum, item) => sum + (state.educatorRisks[item.id] ? 1 : 0), 0);
     }
 
+    // 3 個月、6 個月、乾體重下降常是同一次體重下降，總分只計第一個勾選項
+    function dietitianItemScores() {
+      const scores = {};
+      let weightCounted = false;
+      for (const item of dietitianItems) {
+        if (state.dietitian[item.id] !== true || item.support) {
+          scores[item.id] = 0;
+        } else if (item.weightGroup && weightCounted) {
+          scores[item.id] = 0;
+        } else {
+          scores[item.id] = item.score;
+          if (item.weightGroup) weightCounted = true;
+        }
+      }
+      return scores;
+    }
+
     function dietitianStats() {
       const categoryScores = {};
       let total = 0;
       let supportCount = 0;
       let answered = 0;
+      const itemScores = dietitianItemScores();
       for (const item of dietitianItems) {
         const value = state.dietitian[item.id];
         if (value === true || value === false) answered += 1;
@@ -28,8 +46,9 @@
           supportCount += 1;
           continue;
         }
-        total += item.score;
-        categoryScores[item.category] = (categoryScores[item.category] || 0) + item.score;
+        const score = itemScores[item.id];
+        total += score;
+        categoryScores[item.category] = (categoryScores[item.category] || 0) + score;
       }
       const categories = ["生化", "體重/脂肪", "肌肉量/肌力", "飲食攝取"].map(category => ({
         category,
@@ -72,8 +91,8 @@
       const uacr = uacrMatch ? Number(uacrMatch[0]) : null;
       if (uacr !== null && uacr >= 300 && !risks.proteinuria) hints.push(`UACR/UPCR ${uacr} ≥300：可勾選「明顯蛋白尿」。`);
       const trend = weightTrend(fields);
-      if (trend.m3 !== null && trend.m3 <= -5) hints.push(`3 個月體重下降 ${Math.abs(trend.m3).toFixed(1)}%（≥5%）：達 PEW 體重條件，建議轉營養師確認。`);
-      if (trend.m6 !== null && trend.m6 <= -10) hints.push(`6 個月體重下降 ${Math.abs(trend.m6).toFixed(1)}%（≥10%）：達 PEW 體重條件，建議轉營養師確認。`);
+      if (trend.m3 !== null && trend.m3 <= -5) hints.push(`3 個月體重下降 ${Math.abs(trend.m3).toFixed(1)}%（≥5%）：若為非刻意，達 PEW 體重條件，建議轉營養師確認；刻意減重不計。`);
+      if (trend.m6 !== null && trend.m6 <= -10) hints.push(`6 個月體重下降 ${Math.abs(trend.m6).toFixed(1)}%（≥10%）：若為非刻意，達 PEW 體重條件，建議轉營養師確認；刻意減重不計。`);
       const fluid = fields.edema === "明顯" || fields.heartFailure === "是";
       if (fluid) hints.push("明顯水腫或心衰/腹水：體重下降可能被水分掩蓋，請以乾體重判讀。");
       if (fields.heartFailure === "是" && !risks.heartFailure) hints.push("心衰/腹水：可勾選「心衰竭或反覆水腫」。");
@@ -271,9 +290,10 @@
     }
 
     function updateDietitianTableScores() {
+      const scores = dietitianItemScores();
       for (const item of dietitianItems) {
         const cell = document.querySelector(`[data-score-for="${item.id}"]`);
-        if (cell) cell.textContent = state.dietitian[item.id] === true ? item.score : 0;
+        if (cell) cell.textContent = scores[item.id];
       }
     }
 
@@ -308,7 +328,7 @@
         ["病人自填", "紅旗數", `${pFlags}`, pFlags >= 1 ? "有紅旗" : "無紅旗", pFlags >= 1 ? "聯絡照護團隊" : "例行追蹤", pFlags >= 1 ? "儘快" : "例行"],
         ["衛教師評估", "DKD 風險因子", `${eScore} / 10`, e.text, e.need, eScore >= 3 ? "儘快或依院內流程" : eScore >= 1 ? "1 個月內" : "例行"],
         ["營養師確認", "四大類陽性數", `${dStats.positiveCount} / 4`, d.text, d.action, dStats.positiveCount >= 2 ? "2-4 週內" : "依病況"],
-        ["營養師確認", "PEW 總分", `${dStats.total}`, nutritionTotalText, "依營養師處方追蹤", "依病況"],
+        ["營養師確認", "PEW 總分（工具設定）", `${dStats.total}`, nutritionTotalText, "依營養師處方追蹤", "依病況"],
         ["營養師確認", "病因因子", `${dStats.supportCount} 項`, dStats.supportCount ? "有可逆病因" : "未勾選", dStats.supportCount ? "處理發炎、酸中毒、胃腸症狀或過度限制" : "—", "依病況"]
       ];
       byId("summaryRows").innerHTML = rows.map(row => `

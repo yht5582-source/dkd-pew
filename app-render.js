@@ -54,7 +54,7 @@
         return `
           <tr${item.support ? ' class="support-row"' : ""}>
             <td><span class="category-pill">${escapeHtml(item.category)}</span></td>
-            <td><strong>${escapeHtml(item.indicator)}</strong>${item.reminder ? `<br><span class="note">${escapeHtml(item.reminder)}</span>` : ""}</td>
+            <td><strong>${escapeHtml(item.indicator)}</strong>${item.reminder ? `<br><span class="note">${escapeHtml(item.reminder)}</span>` : ""}${item.extended ? '<br><span class="note">工具擴充，非 ISRNM 原始項目</span>' : ""}</td>
             <td>${escapeHtml(item.criteria)}</td>
             <td>
               <div class="choices two">

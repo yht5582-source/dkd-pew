@@ -101,27 +101,27 @@ const STORAGE_KEY = "dkd-pew-assessment-v1";
     ];
 
     const dietitianItems = [
-      { id: "albumin", category: "生化", indicator: "Serum albumin", criteria: "<3.8 g/dL（BCG 法，ISRNM）；<3.5 g/dL 更具特異性", score: 1, main: true, reminder: "排除大量蛋白尿、肝病、急性感染單獨解釋" },
+      { id: "albumin", category: "生化", indicator: "Serum albumin", criteria: "<3.8 g/dL（BCG 法，ISRNM）", score: 1, main: true, reminder: "排除大量蛋白尿、肝病、急性感染單獨解釋" },
       { id: "prealbumin", category: "生化", indicator: "Prealbumin / transthyretin", criteria: "<30 mg/dL（ISRNM 僅適用透析病人）", score: 1, main: false },
       { id: "cholesterol", category: "生化", indicator: "Total cholesterol", criteria: "<100 mg/dL，且非降脂藥造成", score: 1, main: false },
       { id: "crp", category: "生化", indicator: "CRP 升高", criteria: "支持發炎/病因因子", score: 1, main: false, support: true, reminder: "病因因子，ISRNM 未列為診斷條件，不計入類別陽性" },
       { id: "bicarbonate", category: "生化", indicator: "Bicarbonate", criteria: "<22 mmol/L，支持代謝酸中毒風險", score: 1, main: false, support: true, reminder: "病因因子，不計入類別陽性" },
-      { id: "weightLoss3m", category: "體重/脂肪", indicator: "非刻意體重下降", criteria: "3 個月 ≥5%", score: 2, main: true, reminder: "水腫/心衰者請用乾體重或去水腫後體重" },
-      { id: "weightLoss6m", category: "體重/脂肪", indicator: "非刻意體重下降", criteria: "6 個月 ≥10%", score: 2, main: true },
+      { id: "weightLoss3m", category: "體重/脂肪", indicator: "非刻意體重下降", criteria: "3 個月 ≥5%", score: 2, main: true, weightGroup: true, reminder: "水腫/心衰者請用乾體重或去水腫後體重；刻意減重不計" },
+      { id: "weightLoss6m", category: "體重/脂肪", indicator: "非刻意體重下降", criteria: "6 個月 ≥10%", score: 2, main: true, weightGroup: true, reminder: "同一次體重下降，總分只計一次" },
       { id: "bmiLow", category: "體重/脂肪", indicator: "BMI", criteria: "<23 kg/m²（ISRNM；水腫者用乾體重）", score: 1, main: false },
       { id: "fatLoss", category: "體重/脂肪", indicator: "體脂明顯下降", criteria: "總體脂 <10%（ISRNM），或皮下脂肪明顯下降", score: 1, main: false },
-      { id: "dryWeightLoss", category: "體重/脂肪", indicator: "透析患者乾體重下降", criteria: "≥5% / 3 個月", score: 2, main: true },
-      { id: "calf", category: "肌肉量/肌力", indicator: "小腿圍", criteria: "男 <34 cm；女 <33 cm 或較前下降", score: 1, main: true, reminder: "肥胖型 PEW 需特別看肌肉與肌力" },
+      { id: "dryWeightLoss", category: "體重/脂肪", indicator: "透析患者乾體重下降", criteria: "≥5% / 3 個月", score: 2, main: true, weightGroup: true, reminder: "同一次體重下降，總分只計一次" },
+      { id: "calf", category: "肌肉量/肌力", indicator: "小腿圍", criteria: "男 <34 cm；女 <33 cm 或較前下降", score: 1, main: true, extended: true, reminder: "肥胖型 PEW 需特別看肌肉與肌力" },
       { id: "arm", category: "肌肉量/肌力", indicator: "上臂圍 / 上臂肌圍", criteria: "上臂肌圍較參考族群第 50 百分位低 >10%（ISRNM）或連續下降", score: 1, main: false },
-      { id: "grip", category: "肌肉量/肌力", indicator: "握力", criteria: "男 <28 kg；女 <18 kg 或較前下降 >10%", score: 1, main: true },
-      { id: "sitStand", category: "肌肉量/肌力", indicator: "5 次坐站測試", criteria: "≥12 秒（AWGS 2019）或明顯變慢", score: 1, main: false },
+      { id: "grip", category: "肌肉量/肌力", indicator: "握力", criteria: "男 <28 kg；女 <18 kg 或較前下降 >10%", score: 1, main: true, extended: true },
+      { id: "sitStand", category: "肌肉量/肌力", indicator: "5 次坐站測試", criteria: "≥12 秒（AWGS 2019）或明顯變慢", score: 1, main: false, extended: true },
       { id: "biaDxa", category: "肌肉量/肌力", indicator: "BIA / DXA 肌肉量", criteria: "低肌肉量，或 3 個月減少 ≥5% / 6 個月 ≥10%（ISRNM）", score: 2, main: true },
-      { id: "clinicalWasting", category: "肌肉量/肌力", indicator: "臨床肌肉萎縮", criteria: "顳肌、鎖骨、肩胛、股四頭肌萎縮", score: 1, main: false },
+      { id: "clinicalWasting", category: "肌肉量/肌力", indicator: "臨床肌肉萎縮", criteria: "顳肌、鎖骨、肩胛、股四頭肌萎縮", score: 1, main: false, extended: true },
       { id: "energy", category: "飲食攝取", indicator: "熱量攝取", criteria: "非刻意 <25 kcal/kg/day 持續 ≥2 個月（ISRNM）", score: 1, main: true, reminder: "低蛋白飲食不能犧牲足夠熱量（KDOQI 2020 建議 25-35 kcal/kg/day）" },
       { id: "proteinCkd", category: "飲食攝取", indicator: "蛋白質攝取，非透析 CKD", criteria: "非刻意 <0.6 g/kg/day 持續 ≥2 個月（ISRNM），或明顯低於醫囑且熱量不足", score: 1, main: false },
       { id: "proteinDialysis", category: "飲食攝取", indicator: "蛋白質攝取，HD / PD", criteria: "非刻意 <0.8 g/kg/day 持續 ≥2 個月（ISRNM），或 nPCR/nPNA 偏低", score: 1, main: false, reminder: "KDOQI 2020 透析目標 1.0-1.2 g/kg/day；<1.0 為未達標，尚非 PEW 條件" },
-      { id: "intake75", category: "飲食攝取", indicator: "進食量", criteria: "<平常 75% 持續 ≥1 個月", score: 1, main: true },
-      { id: "intake50", category: "飲食攝取", indicator: "進食量", criteria: "<平常 50% 持續 ≥1 週", score: 2, main: true },
+      { id: "intake75", category: "飲食攝取", indicator: "進食量", criteria: "<平常 75% 持續 ≥1 個月（工具設定）", score: 1, main: true, extended: true },
+      { id: "intake50", category: "飲食攝取", indicator: "進食量", criteria: "<平常 50% 持續 ≥1 週（工具設定）", score: 2, main: true, extended: true },
       { id: "giDiet", category: "飲食攝取", indicator: "胃腸症狀", criteria: "噁心、嘔吐、早飽、腹瀉、便祕影響進食", score: 1, main: false, support: true, reminder: "攝取不足的原因，不計入類別陽性" },
       { id: "overRestrictionDiet", category: "飲食攝取", indicator: "過度飲食限制", criteria: "因怕糖、鉀、磷、蛋白而長期吃太少", score: 1, main: false, support: true, reminder: "攝取不足的原因，不計入類別陽性" }
     ];
@@ -137,12 +137,13 @@ const STORAGE_KEY = "dkd-pew-assessment-v1";
     ];
 
     const referenceItems = [
-      { title: "DKD-PEW（ISRNM 2008）", body: "四大類（生化、體重/脂肪、肌肉量、飲食攝取）中 ≥3 類、每類至少 1 項異常即可診斷 PEW。CRP、碳酸氫根、胃腸症狀與過度限制屬病因因子，本表列為輔助、不計入類別陽性。" },
-      { title: "Albumin", body: "<3.8 g/dL（BCG 法）警覺；<3.5 g/dL 更具特異性。大量蛋白尿、水腫、肝病、感染會干擾，不可單獨診斷。" },
+      { title: "DKD-PEW（ISRNM 2008）", body: "四大類（生化、體重/脂肪、肌肉量、飲食攝取）中 ≥3 類、每類至少 1 項異常即可診斷 PEW；每項條件最好記錄至少 3 次，間隔以 2-4 週為佳。CRP、碳酸氫根、胃腸症狀與過度限制屬病因因子，本表列為輔助、不計入類別陽性。" },
+      { title: "Albumin", body: "ISRNM 切點為 <3.8 g/dL（BCG 法）。尿或腸胃道大量流失蛋白、肝病、降膽固醇藥造成的偏低不適用；水腫、感染也會干擾，不可單獨診斷。紅旗條件的 <3.5 g/dL 為本工具設定的警訊門檻，非 ISRNM 切點。" },
       { title: "CRP", body: "升高支持發炎或疾病負擔，足部傷口、感染、住院後常見；屬病因因子而非診斷條件。" },
       { title: "非刻意體重下降", body: "3 個月 ≥5% 或 6 個月 ≥10%。水腫者用乾體重或去水腫後體重。" },
-      { title: "小腿圍 / 握力 / 坐站（AWGS 2019）", body: "小腿圍男 <34 cm、女 <33 cm；握力男 <28 kg、女 <18 kg；5 次坐站 ≥12 秒。為亞洲肌少症篩檢切點，非 ISRNM 原始條件。" },
-      { title: "飲食攝取（ISRNM）", body: "非刻意熱量 <25 kcal/kg/day，或蛋白質 CKD <0.6、透析 <0.8 g/kg/day，持續 ≥2 個月。進食量 <75%（≥1 月）或 <50%（≥1 週）為臨床常用輔助切點。" },
+      { title: "小腿圍 / 握力 / 坐站（AWGS 2019）", body: "小腿圍男 <34 cm、女 <33 cm；握力男 <28 kg、女 <18 kg；5 次坐站 ≥12 秒。為亞洲肌少症切點，非 ISRNM 原始條件，本工具擴充列入肌肉類。" },
+      { title: "飲食攝取（ISRNM）", body: "非刻意熱量 <25 kcal/kg/day，或蛋白質 CKD <0.6、透析 <0.8 g/kg/day，持續 ≥2 個月。進食量 <75%（≥1 月）或 <50%（≥1 週）為本工具設定的輔助切點，非 ISRNM 條件。" },
       { title: "KDOQI 2020 營養目標", body: "熱量 25-35 kcal/kg/day。蛋白質：CKD 3-5 未透析且代謝穩定 0.55-0.6 g/kg/day（糖尿病者 0.6-0.8）；HD/PD 1.0-1.2 g/kg/day。" },
+      { title: "本工具設定（未經驗證）", body: "以下為本工具自訂、未在所列文獻中找到出處：自填分層 4／7／11 分與紅旗條件、衛教師風險分層 1／3 分、PEW 總分與分層 3／5／7 分。請作為工作流程提示，不作為診斷依據。" },
       { title: "出處", body: "Fouque D, et al. Kidney Int 2008;73:391-398（ISRNM PEW）。Ikizler TA, et al. Am J Kidney Dis 2020;76(3 Suppl 1):S1-S107（KDOQI Nutrition 2020）。Chen LK, et al. J Am Med Dir Assoc 2020;21:300-307（AWGS 2019）。" }
     ];

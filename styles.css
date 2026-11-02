@@ -196,6 +196,10 @@
       gap: 16px;
     }
 
+    .grid > * {
+      min-width: 0;
+    }
+
     .grid.two {
       grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.8fr);
       align-items: start;

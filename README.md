@@ -14,6 +14,8 @@
 
 https://yht5582-source.github.io/dkd-pew/
 
+自填分層、衛教師分層、PEW 總分與進食量比例切點為本工具設定，未經驗證；握力、小腿圍、坐站、臨床萎縮與進食量比例為工具擴充項，非 ISRNM 原始項目。
+
 ## 開發
 
 - 檔案：`app-data.js`（題目與標準）、`app-utils.js`、`app-render.js`、`app-logic.js`（計分與判讀）、`app.js`（啟動）。

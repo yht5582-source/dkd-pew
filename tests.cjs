@@ -196,6 +196,31 @@ test("quiz item 19: tool counts 3 categories for albumin + grip + intake75", () 
   run('state.dietitian = { albumin: true, grip: true, intake75: true }');
   assert.strictEqual(run("dietitianStats().positiveCount"), 3);
 });
+test("the same weight loss counts once in the total but stays one category", () => {
+  run('state.dietitian = { weightLoss3m: true, weightLoss6m: true, dryWeightLoss: true }');
+  const s = run("dietitianStats()");
+  assert.strictEqual(s.total, 2);
+  assert.strictEqual(s.positiveCount, 1);
+  assert.strictEqual(run("dietitianItemScores().weightLoss3m"), 2);
+  assert.strictEqual(run("dietitianItemScores().dryWeightLoss"), 0);
+});
+test("weight hints say the criterion applies only if unintentional", () => {
+  run('Object.assign(state.educatorFields, { weightToday: "54", weight3m: "60", weight6m: "60" })');
+  const h = run("educatorHints()");
+  assert.strictEqual(h.length, 2);
+  assert.ok(h.every(x => x.includes("若為非刻意") && x.includes("刻意減重不計")));
+});
+test("non-ISRNM items are labelled as tool extensions", () => {
+  const ids = run("dietitianItems.filter(i => i.extended).map(i => i.id)");
+  assert.deepStrictEqual([...ids].sort(), ["calf", "clinicalWasting", "grip", "intake50", "intake75", "sitStand"]);
+  assert.ok(run('renderDietitianRows.toString()').includes("工具擴充"));
+});
+test("albumin <3.5 is no longer described as more specific; cut-offs are labelled", () => {
+  const text = run("JSON.stringify([dietitianItems, referenceItems])");
+  assert.ok(!text.includes("更具特異性"));
+  assert.ok(!text.includes("臨床常用"));
+  assert.ok(text.includes("本工具設定（未經驗證）"));
+});
 test("map: 6 branches, each with leaves", () => {
   const branches = run("TEACH_MAP.branches");
   assert.strictEqual(branches.length, 6);
