@@ -8,7 +8,7 @@ const ctx = vm.createContext({
   structuredClone, console,
   localStorage: { getItem: k => store[k] ?? null, setItem: (k, v) => { store[k] = v; }, removeItem: k => { delete store[k]; } }
 });
-for (const f of ["app-data.js", "app-utils.js", "app-render.js", "app-logic.js"]) {
+for (const f of ["app-data.js", "app-utils.js", "app-render.js", "app-logic.js", "teach-content.js", "teach.js"]) {
   vm.runInContext(fs.readFileSync(`${__dirname}/${f}`, "utf8"), ctx, { filename: f });
 }
 const run = code => vm.runInContext(code, ctx);
@@ -108,5 +108,97 @@ test("every supportive item is marked and non-main", () => {
   const ids = run("dietitianItems.filter(i => i.support).map(i => i.id)");
   assert.deepStrictEqual([...ids].sort(), ["bicarbonate", "crp", "giDiet", "overRestrictionDiet"]);
   assert.ok(run("dietitianItems.filter(i => i.support).every(i => !i.main)"));
+});
+
+// 教學內容：病例 expect 對引擎、題庫結構
+const close1 = (actual, expected, label) => assert.ok(actual !== null && Math.abs(actual - expected) < 0.051, `${label}: ${actual} vs ${expected}`);
+const cases = run("TEACH_CASES");
+const quiz = run("TEACH_QUIZ");
+const sources = run("Object.keys(TEACH_SOURCES)");
+test("6 cases with unique ids and valid field ids", () => {
+  assert.strictEqual(cases.length, 6);
+  assert.strictEqual(new Set(cases.map(c => c.id)).size, 6);
+  const dietIds = run("dietitianItems.map(i => i.id)");
+  const riskIds = run("educatorRisks.map(i => i.id)");
+  const flagIds = run("redFlagItems.map(i => i.id)");
+  const questionIds = run("patientQuestions.map(q => q.id)");
+  const medicalCount = run("medicalChecks.length");
+  for (const c of cases) {
+    assert.deepStrictEqual(Object.keys(c.input.patientAnswers).sort(), [...questionIds].sort(), c.id);
+    c.input.educatorRisks.forEach(id => assert.ok(riskIds.includes(id), id));
+    c.input.redFlags.forEach(id => assert.ok(flagIds.includes(id), id));
+    c.input.na.forEach(id => assert.ok(dietIds.includes(id), id));
+    Object.keys(c.input.notes).forEach(id => assert.ok(dietIds.includes(id), id));
+    c.input.medicalChecks.forEach(i => assert.ok(i < medicalCount));
+    c.src.forEach(key => assert.ok(sources.includes(key), key));
+    assert.ok(c.scenarios.length >= 2);
+    for (const s of c.scenarios) {
+      s.yes.forEach(id => assert.ok(dietIds.includes(id), id));
+      s.yes.forEach(id => assert.ok(!c.input.na.includes(id), `${c.id} ${id} in both yes and na`));
+    }
+  }
+});
+for (const c of cases) {
+  c.scenarios.forEach((s, i) => {
+    test(`case ${c.id} / ${s.label} matches engine`, () => {
+      const r = run(`evaluateCase(TEACH_CASES.find(c => c.id === "${c.id}"), TEACH_CASES.find(c => c.id === "${c.id}").scenarios[${i}])`);
+      assert.strictEqual(r.positive, s.expect.positive);
+      assert.strictEqual(r.badge, s.expect.badge);
+      assert.strictEqual(r.total, s.expect.total);
+      assert.strictEqual(r.support, s.expect.support);
+      assert.strictEqual(r.patient, c.expect.patient);
+      assert.strictEqual(r.flags, c.expect.flags);
+      assert.strictEqual(r.patientBadge, c.expect.patientBadge);
+      assert.strictEqual(r.educator, c.expect.educator);
+      assert.strictEqual(r.tier, c.expect.tier);
+      close1(r.bmi, c.expect.bmi, "bmi");
+      close1(r.trend.m3, c.expect.m3, "m3");
+      if (c.expect.m6 === null) assert.strictEqual(r.trend.m6, null);
+      else close1(r.trend.m6, c.expect.m6, "m6");
+      if (c.expect.hints !== undefined) assert.strictEqual(r.hints, c.expect.hints);
+    });
+  });
+}
+test("evaluateCase leaves the live state untouched", () => {
+  run('state.basics.name = "real"; evaluateCase(TEACH_CASES[0], TEACH_CASES[0].scenarios[0])');
+  assert.strictEqual(run("state.basics.name"), "real");
+  assert.strictEqual(run("state.demoCase"), undefined);
+});
+test("hasUserData: clean state and demo state do not prompt; real data does", () => {
+  assert.strictEqual(run("hasUserData()"), false);
+  run("state = buildCaseState(TEACH_CASES[0], TEACH_CASES[0].scenarios[0])");
+  assert.strictEqual(run("hasUserData()"), false);
+  reset();
+  run('state.basics.age = "70"');
+  assert.strictEqual(run("hasUserData()"), true);
+});
+test("quiz: 20 questions, 10 + 10, A-D 5 each, valid sources", () => {
+  assert.strictEqual(quiz.length, 20);
+  assert.strictEqual(quiz.filter(q => q.level === "基礎").length, 10);
+  assert.strictEqual(quiz.filter(q => q.level === "高階").length, 10);
+  for (let a = 0; a < 4; a += 1) assert.strictEqual(quiz.filter(q => q.answer === a).length, 5);
+  for (const q of quiz) {
+    assert.strictEqual(q.options.length, 4);
+    assert.strictEqual(new Set(q.options).size, 4);
+    assert.ok(q.why.length > 0);
+    q.src.forEach(key => assert.ok(sources.includes(key), key));
+  }
+});
+test("quiz: the correct option is rarely the longest", () => {
+  // 只算「唯一最長」；等長的數字選項不會洩題
+  const longest = quiz.filter(q => q.options.every((o, i) => i === q.answer || o.length < q.options[q.answer].length));
+  assert.ok(longest.length <= 5,`${longest.length} of 20: ${longest.map(q => q.stem.slice(0, 12)).join(" | ")}`);
+});
+test("quiz item 10 agrees with the engine", () => {
+  assert.strictEqual(run("patientInterpretation(3,1).next"), "進一步評估");
+});
+test("quiz item 19: tool counts 3 categories for albumin + grip + intake75", () => {
+  run('state.dietitian = { albumin: true, grip: true, intake75: true }');
+  assert.strictEqual(run("dietitianStats().positiveCount"), 3);
+});
+test("map: 6 branches, each with leaves", () => {
+  const branches = run("TEACH_MAP.branches");
+  assert.strictEqual(branches.length, 6);
+  branches.forEach(b => assert.ok(b.leaves.length >= 4));
 });
 console.log(`${n} tests passed`);

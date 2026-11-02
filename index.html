@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="DKD-PEW 評估工具：病人自填、衛教師、營養師三份獨立評估表。">
   <title>DKD-PEW 評估工具</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2.1">
+  <link rel="stylesheet" href="teach.css?v=2.1">
 </head>
 <body>
   <header class="topbar">
@@ -35,7 +36,15 @@
       <button class="tab" type="button" role="tab" id="tab-dietitian" aria-controls="dietitian" data-tab="dietitian" aria-selected="false">營養師確認</button>
       <button class="tab" type="button" role="tab" id="tab-summary" aria-controls="summary" data-tab="summary" aria-selected="false">判定摘要</button>
       <button class="tab" type="button" role="tab" id="tab-references" aria-controls="references" data-tab="references" aria-selected="false">參考標準</button>
+      <button class="tab" type="button" role="tab" id="tab-cases" aria-controls="cases" data-tab="cases" aria-selected="false">示範病例</button>
+      <button class="tab" type="button" role="tab" id="tab-quiz" aria-controls="quiz" data-tab="quiz" aria-selected="false">考題</button>
+      <button class="tab" type="button" role="tab" id="tab-map" aria-controls="map" data-tab="map" aria-selected="false">心智圖</button>
     </nav>
+
+    <div class="demo-banner" id="demoBanner" hidden>
+      <span id="demoBannerText"></span>
+      <button class="btn" type="button" id="demoClear">清除示範資料</button>
+    </div>
 
     <section class="panel active" id="patient" role="tabpanel" aria-labelledby="tab-patient">
       <div class="grid two">
@@ -321,12 +330,75 @@
         </div>
       </div>
     </section>
+
+    <section class="panel teach-panel" id="cases" role="tabpanel" aria-labelledby="tab-cases">
+      <div class="tool-card" style="margin-bottom: 16px;">
+        <div class="section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: 0;">
+          <div>
+            <h2>示範病例</h2>
+            <p>6 例虛構病例。表格由工具即時計算；按「帶入工具」可在三張評估表看到完整填法。</p>
+          </div>
+          <span class="badge blue">教學用</span>
+        </div>
+      </div>
+      <div id="caseList"></div>
+      <div class="tool-card source-list-box">
+        <h3>參考文獻</h3>
+        <ol class="source-list"></ol>
+      </div>
+    </section>
+
+    <section class="panel teach-panel" id="quiz" role="tabpanel" aria-labelledby="tab-quiz">
+      <div class="tool-card" style="margin-bottom: 16px;">
+        <div class="section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: 0;">
+          <div>
+            <h2>考題</h2>
+            <p>基礎 10 題、高階 10 題。作答後顯示解析；重新整理頁面即清空，不會保存。</p>
+          </div>
+          <span class="badge">20 題</span>
+        </div>
+      </div>
+      <div class="quiz-bar">
+        <div class="quiz-filter">
+          <button class="btn" type="button" data-quiz-filter="全部" aria-pressed="true">全部</button>
+          <button class="btn" type="button" data-quiz-filter="基礎" aria-pressed="false">基礎</button>
+          <button class="btn" type="button" data-quiz-filter="高階" aria-pressed="false">高階</button>
+        </div>
+        <div class="quiz-score-wrap">
+          <span id="quizScore"></span>
+          <button class="btn" type="button" id="quizReset">重新作答</button>
+        </div>
+      </div>
+      <div id="quizList"></div>
+      <div class="tool-card source-list-box">
+        <h3>參考文獻</h3>
+        <ol class="source-list"></ol>
+      </div>
+    </section>
+
+    <section class="panel teach-panel" id="map" role="tabpanel" aria-labelledby="tab-map">
+      <div class="tool-card" style="margin-bottom: 16px;">
+        <div class="section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: 0;">
+          <div>
+            <h2>心智圖</h2>
+            <p>點分支標題可收合。單位：白蛋白 g/dL；前白蛋白、膽固醇 mg/dL；熱量 kcal/kg/day；蛋白質 g/kg/day。</p>
+          </div>
+        </div>
+      </div>
+      <div class="map-actions">
+        <button class="btn" type="button" data-map-all="open">全部展開</button>
+        <button class="btn" type="button" data-map-all="close">全部收合</button>
+      </div>
+      <div class="map-body" id="mapBody"></div>
+    </section>
   </main>
 
-  <script src="app-data.js"></script>
-  <script src="app-utils.js"></script>
-  <script src="app-render.js"></script>
-  <script src="app-logic.js"></script>
-  <script src="app.js"></script>
+  <script src="app-data.js?v=2.1"></script>
+  <script src="app-utils.js?v=2.1"></script>
+  <script src="app-render.js?v=2.1"></script>
+  <script src="app-logic.js?v=2.1"></script>
+  <script src="teach-content.js?v=2.1"></script>
+  <script src="teach.js?v=2.1"></script>
+  <script src="app.js?v=2.1"></script>
 </body>
 </html>

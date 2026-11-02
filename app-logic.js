@@ -258,6 +258,7 @@
       setText("finalAction", "病人自填、衛教師評估、營養師評估可分別使用；摘要頁不產生因果式結論。");
       renderSummaryRows(pScore, pFlags, p, eScore, e, dStats, d);
       updateCategorySummaryIds(dStats);
+      renderDemoBanner();
 
       saveState();
     }
@@ -401,6 +402,7 @@
       });
       document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === target));
       if (updateHash && location.hash.slice(1) !== target) history.replaceState(null, "", `#${target}`);
+      if (target === "map") drawTeachMap();
     }
 
     function syncDuplicateBasicFields(key, value, originId) {
